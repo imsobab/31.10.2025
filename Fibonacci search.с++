@@ -1,0 +1,246 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+// Генерация чисел Фибоначчи до заданного предела
+std::vector<int> generateFibonacciNumbers(int n) {
+    std::vector<int> fib;
+    if (n <= 0) return fib;
+    
+    fib.push_back(0);
+    if (n == 1) return fib;
+    
+    fib.push_back(1);
+    if (n == 2) return fib;
+    
+    int a = 0, b = 1, c = 1;
+    while (c <= n) {
+        fib.push_back(c);
+        a = b;
+        b = c;
+        c = a + b;
+    }
+    
+    return fib;
+}
+
+// Поиск Фибоначчи
+int fibonacciSearch(const std::vector<int>& arr, int target) {
+    std::cout << "=== НАЧАЛО ПОИСКА ФИБОНАЧЧИ ===" << std::endl;
+    std::cout << "Ищем элемент: " << target << std::endl;
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl << std::endl;
+    
+    int n = arr.size();
+    
+    // Находим наименьшее число Фибоначчи >= n
+    std::vector<int> fib = generateFibonacciNumbers(n);
+    int fibM = fib.back();  // F(m)
+    int fibM1 = fib[fib.size() - 2];  // F(m-1)
+    int fibM2 = fib[fib.size() - 3];  // F(m-2)
+    
+    std::cout << "Числа Фибоначчи: ";
+    for (int f : fib) std::cout << f << " ";
+    std::cout << std::endl;
+    std::cout << "F(m) = " << fibM << ", F(m-1) = " << fibM1 << ", F(m-2) = " << fibM2 << std::endl;
+    std::cout << "Начальные индексы: offset = 0, i = min(offset + F(m-2), n-1)" << std::endl << std::endl;
+    
+    int offset = -1;
+    int step = 1;
+    
+    while (fibM > 1) {
+        std::cout << "--- Шаг " << step++ << " ---" << std::endl;
+        
+        // Проверяем valid index
+        int i = std::min(offset + fibM2, n - 1);
+        
+        std::cout << "  offset = " << offset << ", F(m-2) = " << fibM2 << std::endl;
+        std::cout << "  i = min(" << offset << " + " << fibM2 << ", " << (n-1) << ") = " << i << std::endl;
+        std::cout << "  arr[" << i << "] = " << arr[i] << std::endl;
+        
+        // Визуализация текущего состояния
+        std::cout << "  Текущая область: ";
+        for (int j = 0; j < n; j++) {
+            if (j == i) std::cout << "[" << arr[j] << "] ";
+            else if (j > offset && (offset + fibM >= n || j < offset + fibM)) 
+                std::cout << arr[j] << " ";
+            else 
+                std::cout << ". ";
+        }
+        std::cout << std::endl;
+        
+        std::cout << "  Сравниваем " << arr[i] << " с " << target;
+        
+        if (arr[i] < target) {
+            std::cout << " -> " << arr[i] << " < " << target << ", ищем в ПРАВОЙ части" << std::endl;
+            fibM = fibM1;
+            fibM1 = fibM2;
+            fibM2 = fibM - fibM1;
+            offset = i;
+            std::cout << "  Новые значения: F(m) = " << fibM << ", F(m-1) = " << fibM1 << ", F(m-2) = " << fibM2 << std::endl;
+            std::cout << "  Новый offset = " << offset << std::endl;
+        }
+        else if (arr[i] > target) {
+            std::cout << " -> " << arr[i] << " > " << target << ", ищем в ЛЕВОЙ части" << std::endl;
+            fibM = fibM2;
+            fibM1 = fibM1 - fibM2;
+            fibM2 = fibM - fibM1;
+            std::cout << "  Новые значения: F(m) = " << fibM << ", F(m-1) = " << fibM1 << ", F(m-2) = " << fibM2 << std::endl;
+        }
+        else {
+            std::cout << " -> НАЙДЕНО!" << std::endl;
+            std::cout << "Элемент " << target << " найден на позиции " << i << std::endl;
+            return i;
+        }
+        
+        std::cout << std::endl;
+    }
+    
+    // Проверяем последний элемент
+    if (fibM1 && arr[offset + 1] == target) {
+        std::cout << "Проверяем последний элемент: arr[" << (offset + 1) << "] = " << arr[offset + 1] << std::endl;
+        std::cout << "Элемент " << target << " найден на позиции " << (offset + 1) << std::endl;
+        return offset + 1;
+    }
+    
+    std::cout << "Элемент " << target << " не найден в массиве" << std::endl;
+    return -1;
+}
+
+// Объяснение последовательности Фибоначчи
+void explainFibonacciSequence() {
+    std::cout << "\n*** ПОСЛЕДОВАТЕЛЬНОСТЬ ФИБОНАЧЧИ ***" << std::endl;
+    std::cout << "Числа Фибоначчи: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ..." << std::endl;
+    std::cout << "Рекуррентная формула: F(n) = F(n-1) + F(n-2)" << std::endl;
+    std::cout << "где F(0) = 0, F(1) = 1" << std::endl << std::endl;
+    
+    std::cout << "СВОЙСТВА ДЛЯ ПОИСКА:" << std::endl;
+    std::cout << "1. F(m) = F(m-1) + F(m-2)" << std::endl;
+    std::cout << "2. Массив делится в соотношении F(m-2) : F(m-1)" << std::endl;
+    std::cout << "3. Каждое число ≈ 1.618 (золотое сечение) раза больше предыдущего" << std::endl;
+}
+
+// Визуализация принципа разделения
+void visualizeDivisionPrinciple() {
+    std::cout << "\n*** ПРИНЦИП РАЗДЕЛЕНИЯ ***" << std::endl;
+    
+    int n = 21;  // Размер массива
+    std::vector<int> fib = generateFibonacciNumbers(n);
+    int fibM = fib.back();
+    int fibM1 = fib[fib.size() - 2];
+    int fibM2 = fib[fib.size() - 3];
+    
+    std::cout << "Для массива размером " << n << ":" << std::endl;
+    std::cout << "F(m) = " << fibM << ", F(m-1) = " << fibM1 << ", F(m-2) = " << fibM2 << std::endl;
+    std::cout << "Проверка: " << fibM2 << " + " << fibM1 << " = " << (fibM2 + fibM1) << " = F(m)" << std::endl << std::endl;
+    
+    std::cout << "ПРОЦЕСС РАЗДЕЛЕНИЯ:" << std::endl;
+    std::cout << "1. Вычисляем позицию: i = offset + F(m-2)" << std::endl;
+    std::cout << "2. Сравниваем arr[i] с target" << std::endl;
+    std::cout << "3. Если arr[i] < target:" << std::endl;
+    std::cout << "   - Сдвигаем offset в i" << std::endl;
+    std::cout << "   - F(m) = F(m-1), F(m-1) = F(m-2), F(m-2) = F(m) - F(m-1)" << std::endl;
+    std::cout << "4. Если arr[i] > target:" << std::endl;
+    std::cout << "   - F(m) = F(m-2), F(m-1) = F(m-1) - F(m-2), F(m-2) = F(m) - F(m-1)" << std::endl;
+}
+
+// Сравнение с бинарным поиском
+void compareWithBinarySearch(const std::vector<int>& arr, int target) {
+    std::cout << "\n=== СРАВНЕНИЕ С БИНАРНЫМ ПОИСКОМ ===" << std::endl;
+    
+    // Поиск Фибоначчи
+    std::cout << "ПОИСК ФИБОНАЧЧИ:" << std::endl;
+    int fibSteps = 0;
+    int n = arr.size();
+    std::vector<int> fib = generateFibonacciNumbers(n);
+    int fibM = fib.back();
+    int fibM1 = fib[fib.size() - 2];
+    int fibM2 = fib[fib.size() - 3];
+    int offset = -1;
+    
+    while (fibM > 1) {
+        fibSteps++;
+        int i = std::min(offset + fibM2, n - 1);
+        
+        if (arr[i] < target) {
+            fibM = fibM1;
+            fibM1 = fibM2;
+            fibM2 = fibM - fibM1;
+            offset = i;
+        }
+        else if (arr[i] > target) {
+            fibM = fibM2;
+            fibM1 = fibM1 - fibM2;
+            fibM2 = fibM - fibM1;
+        }
+        else {
+            break;
+        }
+    }
+    
+    // Бинарный поиск
+    std::cout << "БИНАРНЫЙ ПОИСК:" << std::endl;
+    int low = 0;
+    int high = arr.size() - 1;
+    int binarySteps = 0;
+    
+    while (low <= high) {
+        binarySteps++;
+        int mid = low + (high - low) / 2;
+        
+        if (arr[mid] == target) break;
+        if (arr[mid] < target) low = mid + 1;
+        else high = mid - 1;
+    }
+    
+    std::cout << "Результаты сравнения:" << std::endl;
+    std::cout << "  Поиск Фибоначчи: " << fibSteps << " шагов" << std::endl;
+    std::cout << "  Бинарный поиск: " << binarySteps << " шагов" << std::endl;
+    std::cout << "  Разница: " << (binarySteps - fibSteps) << " шагов" << std::endl;
+}
+
+// Демонстрация на различных размерах массивов
+void demonstrateDifferentSizes() {
+    std::cout << "\n*** ДЕМОНСТРАЦИЯ НА РАЗНЫХ РАЗМЕРАХ ***" << std::endl;
+    
+    // Маленький массив
+    std::vector<int> small = {1, 3, 5, 7, 9, 11, 13};
+    std::cout << "1. МАЛЕНЬКИЙ МАССИВ (7 элементов):" << std::endl;
+    fibonacciSearch(small, 7);
+    
+    // Средний массив
+    std::vector<int> medium(21);
+    for (int i = 0; i < 21; i++) medium[i] = i * 2;
+    std::cout << "\n2. СРЕДНИЙ МАССИВ (21 элемент):" << std::endl;
+    fibonacciSearch(medium, 24);
+    
+    // Массив размером с число Фибоначчи
+    std::vector<int> fibSize(13);  // 13 - число Фибоначчи
+    for (int i = 0; i < 13; i++) fibSize[i] = i * 3;
+    std::cout << "\n3. МАССИВ РАЗМЕРОМ С ЧИСЛО ФИБОНАЧЧИ (13):" << std::endl;
+    fibonacciSearch(fibSize, 18);
+}
+
+int main() {
+    // Основной пример
+    std::vector<int> numbers = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25};
+    int target = 15;
+    
+    std::cout << "=== ОСНОВНОЙ ПРИМЕР ===" << std::endl;
+    fibonacciSearch(numbers, target);
+    
+    // Объяснение последовательности
+    explainFibonacciSequence();
+    
+    // Визуализация принципа
+    visualizeDivisionPrinciple();
+    
+    // Сравнение с бинарным поиском
+    compareWithBinarySearch(numbers, target);
+    
+    // Демонстрация на разных размерах
+    demonstrateDifferentSizes();
+    
+    return 0;
+}
