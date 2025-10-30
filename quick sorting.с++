@@ -1,0 +1,226 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+// Функция разделения (partition)
+int partition(std::vector<int>& arr, int low, int high, int depth) {
+    std::string indent(depth * 2, ' ');
+    
+    std::cout << indent << "Разделение: arr[" << low << ".." << high << "]" << std::endl;
+    std::cout << indent << "Подмассив: ";
+    for (int i = low; i <= high; i++) std::cout << arr[i] << " ";
+    std::cout << std::endl;
+    
+    // Выбираем опорный элемент (pivot) - последний элемент
+    int pivot = arr[high];
+    std::cout << indent << "Опорный элемент (pivot): arr[" << high << "] = " << pivot << std::endl;
+    
+    // Индекс для элемента, который меньше pivot
+    int i = low - 1;
+    
+    std::cout << indent << "Процесс разделения:" << std::endl;
+    
+    for (int j = low; j < high; j++) {
+        std::cout << indent << "  Сравниваем arr[" << j << "] = " << arr[j] << " с pivot = " << pivot;
+        
+        // Если текущий элемент меньше или равен pivot
+        if (arr[j] <= pivot) {
+            i++;  // Увеличиваем индекс меньшего элемента
+            std::cout << " -> МЕНЯЕМ с arr[" << i << "] = " << arr[i] << std::endl;
+            std::swap(arr[i], arr[j]);
+            
+            std::cout << indent << "  Текущее состояние: ";
+            for (int k = low; k <= high; k++) std::cout << arr[k] << " ";
+            std::cout << std::endl;
+        } else {
+            std::cout << " -> пропускаем" << std::endl;
+        }
+    }
+    
+    // Помещаем pivot на правильную позицию
+    std::cout << indent << "Помещаем pivot на позицию " << (i + 1) << std::endl;
+    std::swap(arr[i + 1], arr[high]);
+    
+    std::cout << indent << "Результат разделения: ";
+    for (int k = low; k <= high; k++) {
+        if (k == i + 1) std::cout << "[" << arr[k] << "] ";  // Выделяем pivot
+        else std::cout << arr[k] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << indent << "Позиция pivot: " << (i + 1) << std::endl;
+    
+    return i + 1;
+}
+
+// Основная функция быстрой сортировки
+void quickSort(std::vector<int>& arr, int low, int high, int depth = 0) {
+    std::string indent(depth * 2, ' ');
+    
+    std::cout << indent << "quickSort(arr, " << low << ", " << high << ")" << std::endl;
+    
+    if (low < high) {
+        // pi - индекс разделения, arr[pi] теперь на правильном месте
+        int pi = partition(arr, low, high, depth);
+        
+        std::cout << indent << "Рекурсивно сортируем левую и правую части:" << std::endl;
+        std::cout << indent << "Левая часть: arr[" << low << ".." << (pi - 1) << "]" << std::endl;
+        std::cout << indent << "Правая часть: arr[" << (pi + 1) << ".." << high << "]" << std::endl;
+        
+        // Рекурсивно сортируем элементы до и после разделения
+        quickSort(arr, low, pi - 1, depth + 1);   // Левая часть
+        quickSort(arr, pi + 1, high, depth + 1);  // Правая часть
+    } else {
+        std::cout << indent << "Базовый случай - подмассив из одного элемента или пустой" << std::endl;
+    }
+    
+    std::cout << indent << "Возврат из quickSort(arr, " << low << ", " << high << ")" << std::endl;
+}
+
+// Версия с выбором медианы в качестве опорного элемента
+int medianOfThree(std::vector<int>& arr, int low, int high) {
+    int mid = low + (high - low) / 2;
+    
+    // Сортируем low, mid, high
+    if (arr[low] > arr[mid]) std::swap(arr[low], arr[mid]);
+    if (arr[low] > arr[high]) std::swap(arr[low], arr[high]);
+    if (arr[mid] > arr[high]) std::swap(arr[mid], arr[high]);
+    
+    // Помещаем медиану в конец (позицию high)
+    std::swap(arr[mid], arr[high]);
+    return arr[high];
+}
+
+int partitionWithMedian(std::vector<int>& arr, int low, int high) {
+    // Выбираем медиану из первого, среднего и последнего элементов
+    int pivot = medianOfThree(arr, low, high);
+    int i = low - 1;
+    
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            std::swap(arr[i], arr[j]);
+        }
+    }
+    std::swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortWithMedian(std::vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partitionWithMedian(arr, low, high);
+        quickSortWithMedian(arr, low, pi - 1);
+        quickSortWithMedian(arr, pi + 1, high);
+    }
+}
+
+// Итеративная версия быстрой сортировки (без рекурсии)
+void iterativeQuickSort(std::vector<int>& arr, int low, int high) {
+    std::cout << "\n=== ИТЕРАТИВНАЯ ВЕРСИЯ ===" << std::endl;
+    
+    // Создаем стек для хранения границ
+    std::vector<int> stack;
+    stack.push_back(low);
+    stack.push_back(high);
+    
+    while (!stack.empty()) {
+        high = stack.back(); stack.pop_back();
+        low = stack.back(); stack.pop_back();
+        
+        if (low < high) {
+            int pi = partition(arr, low, high, 0);
+            
+            // Добавляем левую часть в стек
+            if (pi - 1 > low) {
+                stack.push_back(low);
+                stack.push_back(pi - 1);
+            }
+            
+            // Добавляем правую часть в стек
+            if (pi + 1 < high) {
+                stack.push_back(pi + 1);
+                stack.push_back(high);
+            }
+        }
+    }
+}
+
+// Вспомогательная функция для запуска сортировки
+void quickSort(std::vector<int>& arr) {
+    std::cout << "=== НАЧАЛО БЫСТРОЙ СОРТИРОВКИ ===" << std::endl;
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl << std::endl;
+    
+    if (arr.empty()) return;
+    
+    quickSort(arr, 0, arr.size() - 1);
+    
+    std::cout << std::endl << "=== СОРТИРОВКА ЗАВЕРШЕНА ===" << std::endl;
+}
+
+void demonstrateWithExample() {
+    std::cout << "\n*** ДЕМОНСТРАЦИЯ НА ПРИМЕРЕ [10, 7, 8, 9, 1, 5] ***" << std::endl;
+    std::vector<int> arr = {10, 7, 8, 9, 1, 5};
+    
+    quickSort(arr);
+    
+    std::cout << "Итоговый результат: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+}
+
+void visualizePartitionProcess() {
+    std::cout << "\n*** ВИЗУАЛИЗАЦИЯ ПРОЦЕССА РАЗДЕЛЕНИЯ ***" << std::endl;
+    std::vector<int> arr = {3, 6, 8, 10, 1, 2, 1};
+    int pivot = 1;  // Последний элемент
+    
+    std::cout << "Массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << " | Pivot: " << pivot << std::endl;
+    
+    std::cout << "Процесс:" << std::endl;
+    std::cout << "i = -1, j = 0: сравниваем 3 и 1 -> 3 > 1, пропускаем" << std::endl;
+    std::cout << "i = -1, j = 1: сравниваем 6 и 1 -> 6 > 1, пропускаем" << std::endl;
+    std::cout << "i = -1, j = 2: сравниваем 8 и 1 -> 8 > 1, пропускаем" << std::endl;
+    std::cout << "i = -1, j = 3: сравниваем 10 и 1 -> 10 > 1, пропускаем" << std::endl;
+    std::cout << "i = -1, j = 4: сравниваем 1 и 1 -> 1 <= 1, i=0, меняем arr[0] и arr[4]" << std::endl;
+    std::cout << "Результат: [1, 6, 8, 10, 3, 2, 1]" << std::endl;
+    std::cout << "i = 0, j = 5: сравниваем 2 и 1 -> 2 > 1, пропускаем" << std::endl;
+    std::cout << "Помещаем pivot на позицию i+1=1: [1, 1, 8, 10, 3, 2, 6]" << std::endl;
+}
+
+int main() {
+    // Основной пример
+    std::vector<int> arr = {10, 80, 30, 90, 40, 50, 70};
+    
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    quickSort(arr);
+    
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    // Демонстрация на другом примере
+    demonstrateWithExample();
+    
+    // Визуализация процесса
+    visualizePartitionProcess();
+    
+    // Тест версии с медианой
+    std::vector<int> arr2 = {64, 34, 25, 12, 22, 11, 90};
+    std::cout << "\nТест версии с медианой трех:" << std::endl;
+    std::cout << "Исходный массив: ";
+    for (int num : arr2) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    quickSortWithMedian(arr2, 0, arr2.size() - 1);
+    
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr2) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    return 0;
+}
