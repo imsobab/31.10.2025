@@ -1,0 +1,267 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+// Итеративная версия бинарного поиска
+int binarySearchIterative(const std::vector<int>& arr, int target) {
+    std::cout << "=== НАЧАЛО БИНАРНОГО ПОИСКА (Итеративная версия) ===" << std::endl;
+    std::cout << "Ищем элемент: " << target << std::endl;
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl << std::endl;
+    
+    int left = 0;
+    int right = arr.size() - 1;
+    int step = 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;  // Предотвращаем переполнение
+        
+        std::cout << "Шаг " << step++ << ":" << std::endl;
+        std::cout << "  Левая граница: " << left << " (arr[" << left << "] = " << arr[left] << ")" << std::endl;
+        std::cout << "  Правая граница: " << right << " (arr[" << right << "] = " << arr[right] << ")" << std::endl;
+        std::cout << "  Середина: " << mid << " (arr[" << mid << "] = " << arr[mid] << ")" << std::endl;
+        
+        // Визуализация текущего состояния
+        std::cout << "  Текущая область: ";
+        for (int i = left; i <= right; i++) {
+            if (i == mid) std::cout << "[" << arr[i] << "] ";
+            else std::cout << arr[i] << " ";
+        }
+        std::cout << std::endl;
+        
+        std::cout << "  Сравниваем " << arr[mid] << " с " << target;
+        
+        if (arr[mid] == target) {
+            std::cout << " -> НАЙДЕНО!" << std::endl;
+            std::cout << "Элемент " << target << " найден на позиции " << mid << std::endl;
+            return mid;
+        }
+        
+        if (arr[mid] < target) {
+            std::cout << " -> " << arr[mid] << " < " << target << ", ищем в ПРАВОЙ части" << std::endl;
+            left = mid + 1;
+        } else {
+            std::cout << " -> " << arr[mid] << " > " << target << ", ищем в ЛЕВОЙ части" << std::endl;
+            right = mid - 1;
+        }
+        
+        std::cout << "  Новая область: left = " << left << ", right = " << right << std::endl << std::endl;
+    }
+    
+    std::cout << "Элемент " << target << " не найден в массиве" << std::endl;
+    return -1;
+}
+
+// Рекурсивная версия бинарного поиска
+int binarySearchRecursive(const std::vector<int>& arr, int target, int left, int right, int depth = 0) {
+    std::string indent(depth * 2, ' ');
+    
+    if (depth == 0) {
+        std::cout << "=== НАЧАЛО БИНАРНОГО ПОИСКА (Рекурсивная версия) ===" << std::endl;
+        std::cout << "Ищем элемент: " << target << std::endl;
+        std::cout << "Отсортированный массив: ";
+        for (int num : arr) std::cout << num << " ";
+        std::cout << std::endl << std::endl;
+    }
+    
+    std::cout << indent << "binarySearch(arr, " << target << ", " << left << ", " << right << ")" << std::endl;
+    
+    if (left > right) {
+        std::cout << indent << "Базовый случай: left > right, элемент не найден" << std::endl;
+        return -1;
+    }
+    
+    int mid = left + (right - left) / 2;
+    
+    std::cout << indent << "  Середина: " << mid << " (arr[" << mid << "] = " << arr[mid] << ")" << std::endl;
+    std::cout << indent << "  Сравниваем " << arr[mid] << " с " << target;
+    
+    if (arr[mid] == target) {
+        std::cout << " -> НАЙДЕНО!" << std::endl;
+        std::cout << indent << "Элемент " << target << " найден на позиции " << mid << std::endl;
+        return mid;
+    }
+    
+    if (arr[mid] < target) {
+        std::cout << " -> " << arr[mid] << " < " << target << ", рекурсивно ищем в ПРАВОЙ части" << std::endl;
+        return binarySearchRecursive(arr, target, mid + 1, right, depth + 1);
+    } else {
+        std::cout << " -> " << arr[mid] << " > " << target << ", рекурсивно ищем в ЛЕВОЙ части" << std::endl;
+        return binarySearchRecursive(arr, target, left, mid - 1, depth + 1);
+    }
+}
+
+// Бинарный поиск с подсчетом сравнений
+void binarySearchWithStats(const std::vector<int>& arr, int target) {
+    std::cout << "\n=== БИНАРНЫЙ ПОИСК С СТАТИСТИКОЙ ===" << std::endl;
+    std::cout << "Размер массива: " << arr.size() << std::endl;
+    std::cout << "Максимальное количество сравнений: " << (int)log2(arr.size()) + 1 << std::endl;
+    
+    int left = 0;
+    int right = arr.size() - 1;
+    int comparisons = 0;
+    
+    while (left <= right) {
+        comparisons++;
+        int mid = left + (right - left) / 2;
+        
+        std::cout << "Сравнение " << comparisons << ": arr[" << mid << "] = " << arr[mid];
+        
+        if (arr[mid] == target) {
+            std::cout << " == " << target << " -> НАЙДЕНО!" << std::endl;
+            std::cout << "Элемент найден за " << comparisons << " сравнений" << std::endl;
+            return;
+        }
+        
+        if (arr[mid] < target) {
+            std::cout << " < " << target << " -> ищем справа" << std::endl;
+            left = mid + 1;
+        } else {
+            std::cout << " > " << target << " -> ищем слева" << std::endl;
+            right = mid - 1;
+        }
+    }
+    
+    std::cout << "Элемент не найден. Выполнено " << comparisons << " сравнений" << std::endl;
+}
+
+// Поиск первого вхождения (нижняя граница)
+int lowerBound(const std::vector<int>& arr, int target) {
+    std::cout << "\n=== ПОИСК НИЖНЕЙ ГРАНИЦЫ (первое вхождение) ===" << std::endl;
+    std::cout << "Ищем первое вхождение элемента >= " << target << std::endl;
+    
+    int left = 0;
+    int right = arr.size();
+    
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        
+        std::cout << "left=" << left << ", right=" << right << ", mid=" << mid << " (arr[" << mid << "]=" << arr[mid] << ")";
+        
+        if (arr[mid] < target) {
+            std::cout << " -> ищем справа" << std::endl;
+            left = mid + 1;
+        } else {
+            std::cout << " -> ищем слева" << std::endl;
+            right = mid;
+        }
+    }
+    
+    std::cout << "Нижняя граница: индекс " << left;
+    if (left < arr.size()) std::cout << " (arr[" << left << "]=" << arr[left] << ")";
+    std::cout << std::endl;
+    
+    return left;
+}
+
+// Демонстрация работы на различных сценариях
+void demonstrateScenarios() {
+    std::cout << "\n*** ДЕМОНСТРАЦИЯ РАЗЛИЧНЫХ СЦЕНАРИЕВ ***" << std::endl;
+    
+    // Сценарий 1: Элемент в начале
+    std::vector<int> arr1 = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+    std::cout << "\n1. ЭЛЕМЕНТ В НАЧАЛЕ:" << std::endl;
+    binarySearchIterative(arr1, 1);
+    
+    // Сценарий 2: Элемент в конце
+    std::vector<int> arr2 = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+    std::cout << "\n2. ЭЛЕМЕНТ В КОНЦЕ:" << std::endl;
+    binarySearchIterative(arr2, 19);
+    
+    // Сценарий 3: Элемент в середине
+    std::vector<int> arr3 = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+    std::cout << "\n3. ЭЛЕМЕНТ В СЕРЕДИНЕ:" << std::endl;
+    binarySearchIterative(arr3, 9);
+    
+    // Сценарий 4: Элемент отсутствует
+    std::vector<int> arr4 = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+    std::cout << "\n4. ЭЛЕМЕНТ ОТСУТСТВУЕТ:" << std::endl;
+    binarySearchIterative(arr4, 8);
+}
+
+// Визуализация процесса для образовательных целей
+void visualizeBinarySearch() {
+    std::cout << "\n*** ВИЗУАЛИЗАЦИЯ ПРОЦЕССА БИНАРНОГО ПОИСКА ***" << std::endl;
+    std::vector<int> arr = {2, 5, 8, 12, 16, 23, 38, 45, 67, 89};
+    int target = 23;
+    
+    std::cout << "Массив: ";
+    for (int i = 0; i < arr.size(); i++) {
+        std::cout << "[" << i << "]=" << arr[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Ищем: " << target << std::endl << std::endl;
+    
+    int left = 0;
+    int right = arr.size() - 1;
+    int step = 1;
+    
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        
+        std::cout << "Шаг " << step++ << ":" << std::endl;
+        std::cout << "Индексы: ";
+        for (int i = 0; i < arr.size(); i++) {
+            if (i == left) std::cout << "L";
+            else std::cout << " ";
+            if (i == mid) std::cout << "M";
+            else std::cout << " ";
+            if (i == right) std::cout << "R";
+            else std::cout << " ";
+            std::cout << "  ";
+        }
+        std::cout << std::endl;
+        
+        std::cout << "Значения: ";
+        for (int i = 0; i < arr.size(); i++) {
+            if (i >= left && i <= right) {
+                if (i == mid) std::cout << "[" << arr[i] << "] ";
+                else std::cout << arr[i] << "   ";
+            } else {
+                std::cout << "     ";
+            }
+        }
+        std::cout << std::endl;
+        
+        if (arr[mid] == target) {
+            std::cout << "✓ Найдено на позиции " << mid << std::endl;
+            break;
+        } else if (arr[mid] < target) {
+            std::cout << "→ Ищем в правой части" << std::endl;
+            left = mid + 1;
+        } else {
+            std::cout << "← Ищем в левой части" << std::endl;
+            right = mid - 1;
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    // Основной пример
+    std::vector<int> numbers = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+    int target = 13;
+    
+    std::cout << "=== ОСНОВНОЙ ПРИМЕР ===" << std::endl;
+    binarySearchIterative(numbers, target);
+    
+    // Рекурсивная версия
+    std::cout << "\n";
+    binarySearchRecursive(numbers, target, 0, numbers.size() - 1);
+    
+    // Поиск с статистикой
+    binarySearchWithStats(numbers, target);
+    
+    // Поиск нижней границы
+    std::vector<int> arrWithDuplicates = {1, 2, 2, 2, 3, 4, 5, 5, 6};
+    lowerBound(arrWithDuplicates, 2);
+    
+    // Демонстрация сценариев
+    demonstrateScenarios();
+    
+    // Визуализация процесса
+    visualizeBinarySearch();
+    
+    return 0;
+}
