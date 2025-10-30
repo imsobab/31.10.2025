@@ -1,0 +1,168 @@
+#include <iostream>
+#include <vector>
+
+// Основная функция сортировки Шелла
+void shellSort(std::vector<int>& arr) {
+    int n = arr.size();
+    
+    std::cout << "=== НАЧАЛО СОРТИРОВКИ ШЕЛЛА ===" << std::endl;
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl << std::endl;
+    
+    // Начинаем с большого gap и постепенно уменьшаем его
+    // Используем последовательность Кнута: 1, 4, 13, 40, 121, ...
+    int gap = 1;
+    while (gap < n / 3) {
+        gap = gap * 3 + 1;
+    }
+    
+    std::cout << "Начальный gap: " << gap << std::endl;
+    
+    // Пока gap > 0
+    while (gap > 0) {
+        std::cout << "\n--- Gap = " << gap << " ---" << std::endl;
+        std::cout << "Сортируем элементы с шагом " << gap << std::endl;
+        
+        // Применяем сортировку вставками для текущего gap
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];  // Текущий элемент для вставки
+            int j = i;
+            
+            std::cout << "  Обрабатываем элемент arr[" << i << "] = " << temp << std::endl;
+            
+            // Сдвигаем элементы, которые больше temp, на gap позиций вперед
+            while (j >= gap && arr[j - gap] > temp) {
+                std::cout << "    Сдвигаем arr[" << (j - gap) << "] = " << arr[j - gap] 
+                          << " на позицию " << j << std::endl;
+                
+                arr[j] = arr[j - gap];
+                j -= gap;
+                
+                std::cout << "    Промежуточное состояние: ";
+                for (int num : arr) std::cout << num << " ";
+                std::cout << std::endl;
+            }
+            
+            // Вставляем temp на правильную позицию
+            if (j != i) {
+                std::cout << "    Вставляем " << temp << " на позицию " << j << std::endl;
+                arr[j] = temp;
+                
+                std::cout << "    Текущее состояние: ";
+                for (int num : arr) std::cout << num << " ";
+                std::cout << std::endl;
+            } else {
+                std::cout << "    Элемент уже на правильной позиции" << std::endl;
+            }
+        }
+        
+        // Уменьшаем gap для следующей итерации
+        int prevGap = gap;
+        gap = (gap - 1) / 3;
+        
+        std::cout << "Уменьшаем gap: " << prevGap << " -> " << gap << std::endl;
+        
+        if (gap > 0) {
+            std::cout << "Текущее состояние массива: ";
+            for (int num : arr) std::cout << num << " ";
+            std::cout << std::endl;
+        }
+    }
+    
+    std::cout << "\n=== СОРТИРОВКА ЗАВЕРШЕНА ===" << std::endl;
+}
+
+// Версия с последовательностью gap = n/2, n/4, n/8, ...
+void shellSortHalf(std::vector<int>& arr) {
+    int n = arr.size();
+    
+    std::cout << "\n=== ВЕРСИЯ С ПОСЛЕДОВАТЕЛЬНОСТЬЮ n/2, n/4, n/8... ===" << std::endl;
+    
+    // Начинаем с gap = n/2 и уменьшаем вдвое на каждой итерации
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        std::cout << "\n--- Gap = " << gap << " ---" << std::endl;
+        
+        // Применяем сортировку вставками для текущего gap
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j = i;
+            
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            arr[j] = temp;
+        }
+        
+        std::cout << "После gap " << gap << ": ";
+        for (int num : arr) std::cout << num << " ";
+        std::cout << std::endl;
+    }
+}
+
+// Функция для демонстрации работы алгоритма
+void demonstrateWithExample() {
+    std::cout << "\n*** ДЕМОНСТРАЦИЯ НА ПРИМЕРЕ [8, 3, 6, 1, 9, 2, 7, 5, 4] ***" << std::endl;
+    std::vector<int> arr = {8, 3, 6, 1, 9, 2, 7, 5, 4};
+    
+    shellSort(arr);
+    
+    std::cout << "Итоговый результат: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+}
+
+// Функция для визуализации процесса с разными gap'ами
+void visualizeGapSorting() {
+    std::cout << "\n*** ВИЗУАЛИЗАЦИЯ ПРОЦЕССА С GAP = 4 ***" << std::endl;
+    std::vector<int> arr = {8, 3, 6, 1, 9, 2, 7, 5, 4};
+    
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    int gap = 4;
+    std::cout << "\nGap = " << gap << ":" << std::endl;
+    std::cout << "Сортируем подмассивы с шагом " << gap << ":" << std::endl;
+    std::cout << "- Подмассив 1: индексы 0,4,8: " << arr[0] << " " << arr[4] << " " << arr[8] << std::endl;
+    std::cout << "- Подмассив 2: индексы 1,5: " << arr[1] << " " << arr[5] << std::endl;
+    std::cout << "- Подмассив 3: индексы 2,6: " << arr[2] << " " << arr[6] << std::endl;
+    std::cout << "- Подмассив 4: индексы 3,7: " << arr[3] << " " << arr[7] << std::endl;
+}
+
+int main() {
+    // Основной пример
+    std::vector<int> arr = {12, 34, 54, 2, 3, 8, 5, 23, 15};
+    
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    shellSort(arr);
+    
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    // Демонстрация на другом примере
+    demonstrateWithExample();
+    
+    // Визуализация процесса
+    visualizeGapSorting();
+    
+    // Тест версии с последовательностью n/2
+    std::vector<int> arr2 = {64, 34, 25, 12, 22, 11, 90, 5};
+    std::cout << "\nТест версии с последовательностью n/2:" << std::endl;
+    std::cout << "Исходный массив: ";
+    for (int num : arr2) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    shellSortHalf(arr2);
+    
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr2) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    return 0;
+}
