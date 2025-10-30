@@ -1,0 +1,112 @@
+#include <iostream>
+#include <vector>
+
+void insertionSort(std::vector<int>& arr) {
+    int n = arr.size();
+    
+    std::cout << "=== НАЧАЛО СОРТИРОВКИ ВСТАВКАМИ ===" << std::endl;
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl << std::endl;
+    
+    // Начинаем со второго элемента (индекс 1), так как первый элемент считается отсортированным
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];  // Текущий элемент, который мы хотим вставить в отсортированную часть
+        int j = i - 1;     // Индекс последнего элемента в отсортированной части
+        
+        std::cout << "--- Шаг " << i << " ---" << std::endl;
+        std::cout << "Вставляем элемент: " << key << " (индекс " << i << ")" << std::endl;
+        std::cout << "Отсортированная часть: ";
+        for (int k = 0; k <= i - 1; k++) std::cout << arr[k] << " ";
+        std::cout << "| ";
+        if (i < n - 1) {
+            for (int k = i + 1; k < n; k++) std::cout << arr[k] << " ";
+        }
+        std::cout << std::endl;
+        
+        // Сдвигаем элементы отсортированной части, которые больше key, вправо
+        // Ищем правильную позицию для key в отсортированной части
+        while (j >= 0 && arr[j] > key) {
+            std::cout << "  Сдвигаем " << arr[j] << " с позиции " << j << " на позицию " << (j + 1) << std::endl;
+            arr[j + 1] = arr[j];  // Сдвигаем элемент вправо
+            j--;  // Переходим к следующему элементу слева
+            
+            // Промежуточное состояние массива
+            std::cout << "  Промежуточное состояние: ";
+            for (int num : arr) std::cout << num << " ";
+            std::cout << std::endl;
+        }
+        
+        // Вставляем key на найденную позицию
+        arr[j + 1] = key;
+        
+        std::cout << "Вставляем " << key << " на позицию " << (j + 1) << std::endl;
+        std::cout << "Текущее состояние массива: ";
+        for (int num : arr) std::cout << num << " ";
+        std::cout << std::endl << std::endl;
+    }
+    
+    std::cout << "=== СОРТИРОВКА ЗАВЕРШЕНА ===" << std::endl;
+}
+
+// Версия с бинарным поиском для оптимизации поиска позиции
+void insertionSortWithBinarySearch(std::vector<int>& arr) {
+    int n = arr.size();
+    
+    std::cout << "\n=== ОПТИМИЗИРОВАННАЯ ВЕРСИЯ С БИНАРНЫМ ПОИСКОМ ===" << std::endl;
+    
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int left = 0;
+        int right = i - 1;
+        
+        // Бинарный поиск позиции для вставки
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (arr[mid] > key) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        // Сдвигаем элементы
+        for (int j = i - 1; j >= left; j--) {
+            arr[j + 1] = arr[j];
+        }
+        
+        // Вставляем элемент
+        arr[left] = key;
+    }
+}
+
+void demonstrateWithExample() {
+    std::cout << "*** ДЕМОНСТРАЦИЯ НА ПРИМЕРЕ [5, 2, 4, 6, 1, 3] ***" << std::endl;
+    std::vector<int> arr = {5, 2, 4, 6, 1, 3};
+    
+    insertionSort(arr);
+    
+    std::cout << "Итоговый результат: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+}
+
+int main() {
+    // Основной пример
+    std::vector<int> arr = {12, 11, 13, 5, 6};
+    
+    std::cout << "Исходный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    insertionSort(arr);
+    
+    std::cout << "Отсортированный массив: ";
+    for (int num : arr) std::cout << num << " ";
+    std::cout << std::endl;
+    
+    // Демонстрация на другом примере
+    demonstrateWithExample();
+    
+    return 0;
+}
